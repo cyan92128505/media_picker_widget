@@ -143,36 +143,31 @@ class _MediaListState extends State<MediaList> {
   }
 
   void _onMediaTileSelected(bool isSelected, MediaViewModel media) {
-    _onMediaTileSelectedInSingle(isSelected, media);
-    _onMediaTileSelectedInMultiple(isSelected, media);
-    widget.onMediaTilePressed(media, _selectedMedias);
+    if (widget.mediaCount == MediaCount.single) {
+      _onMediaTileSelectedInSingle(isSelected, media);
+    } else {
+      _onMediaTileSelectedInMultiple(isSelected, media);
+    }
   }
 
   void _onMediaTileSelectedInSingle(bool isSelected, MediaViewModel media) {
-    if (widget.mediaCount != MediaCount.single) {
-      return;
-    }
     _selectedMedias = [media];
+    widget.onMediaTilePressed(media, _selectedMedias);
   }
 
   void _onMediaTileSelectedInMultiple(bool isSelected, MediaViewModel media) {
-    if (widget.mediaCount != MediaCount.multiple) {
-      return;
+    if (isSelected) {
+      if (widget.mediaCountMax != null &&
+          _selectedMedias.length == widget.mediaCountMax) {
+        return;
+      }
+      _selectedMedias.add(media);
+    } else {
+      _selectedMedias.removeWhere(
+        (_media) => _media.id == media.id,
+      );
     }
-
-    if (!isSelected) {
-      setState(
-          () => _selectedMedias.removeWhere((_media) => _media.id == media.id));
-
-      return;
-    }
-
-    if (widget.mediaCountMax != null &&
-        _selectedMedias.length == widget.mediaCountMax) {
-      return;
-    }
-
-    setState(() => _selectedMedias.add(media));
+    widget.onMediaTilePressed(media, _selectedMedias);
   }
 
   static MediaViewModel _toMediaViewModel(AssetEntity entity) {

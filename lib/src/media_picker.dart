@@ -91,7 +91,9 @@ class _MediaPickerState extends State<MediaPicker> {
   }
 
   Future _onMediaTilePressed(
-      MediaViewModel media, List<MediaViewModel> selectedMedias) async {
+    MediaViewModel media,
+    List<MediaViewModel> selectedMedias,
+  ) async {
     _headerController.currentState?.updateSelection(selectedMedias);
 
     setState(() {
