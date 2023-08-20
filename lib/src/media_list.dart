@@ -10,6 +10,7 @@ class MediaList extends StatefulWidget {
     required this.album,
     required this.previousList,
     this.mediaCount,
+    this.mediaCountMax,
     required this.decoration,
     this.scrollController,
     required this.onMediaTilePressed,
@@ -18,9 +19,11 @@ class MediaList extends StatefulWidget {
   final AssetPathEntity album;
   final List<MediaViewModel> previousList;
   final MediaCount? mediaCount;
+  final int? mediaCountMax;
   final PickerDecoration decoration;
   final ScrollController? scrollController;
-  final Function(MediaViewModel media, List<MediaViewModel> selectedMedias) onMediaTilePressed;
+  final Function(MediaViewModel media, List<MediaViewModel> selectedMedias)
+      onMediaTilePressed;
 
   @override
   _MediaListState createState() => _MediaListState();
@@ -140,17 +143,36 @@ class _MediaListState extends State<MediaList> {
   }
 
   void _onMediaTileSelected(bool isSelected, MediaViewModel media) {
-    if(widget.mediaCount==MediaCount.single){
-      _selectedMedias = [media];
-    }
-    else {
-      if (isSelected) {
-        setState(() => _selectedMedias.add(media));
-      } else {
-        setState(() => _selectedMedias.removeWhere((_media) => _media.id == media.id));
-      }
-    }
+    _onMediaTileSelectedInSingle(isSelected, media);
+    _onMediaTileSelectedInMultiple(isSelected, media);
     widget.onMediaTilePressed(media, _selectedMedias);
+  }
+
+  void _onMediaTileSelectedInSingle(bool isSelected, MediaViewModel media) {
+    if (widget.mediaCount != MediaCount.single) {
+      return;
+    }
+    _selectedMedias = [media];
+  }
+
+  void _onMediaTileSelectedInMultiple(bool isSelected, MediaViewModel media) {
+    if (widget.mediaCount != MediaCount.multiple) {
+      return;
+    }
+
+    if (!isSelected) {
+      setState(
+          () => _selectedMedias.removeWhere((_media) => _media.id == media.id));
+
+      return;
+    }
+
+    if (widget.mediaCountMax != null &&
+        _selectedMedias.length == widget.mediaCountMax) {
+      return;
+    }
+
+    setState(() => _selectedMedias.add(media));
   }
 
   static MediaViewModel _toMediaViewModel(AssetEntity entity) {
@@ -162,7 +184,8 @@ class _MediaListState extends State<MediaList> {
       thumbnailAsync: entity.thumbnailDataWithSize(ThumbnailSize(200, 200)),
       type: mediaType,
       thumbnail: null,
-      videoDuration: entity.type == AssetType.video ? entity.videoDuration : null,
+      videoDuration:
+          entity.type == AssetType.video ? entity.videoDuration : null,
     );
   }
 }

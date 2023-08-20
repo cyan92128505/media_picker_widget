@@ -5,7 +5,8 @@ part of media_picker_widget;
 ///[albumSelector] is the widget that will show the album selector, you can use it to show album selector in your custom header. Use [PickerDecoration] to customize it.
 ///[completeSelection] is called when selection is done. If you want a button for user to confirm selection, you can use it. It will trigger [MediaPicker.onPicked] callback. Note: If MediaPicker's media count is [MediaCount.single], It won't ask for confirmation.
 ///[onBack] is the callback when user press back button. It will close album selector if it is open. Else your [MediaPicker.onCancel] callback will be called.
-typedef HeaderBuilder = Function(BuildContext context, Widget albumSelector, VoidCallback completeSelection, VoidCallback onBack);
+typedef HeaderBuilder = Function(BuildContext context, Widget albumSelector,
+    VoidCallback completeSelection, VoidCallback onBack);
 
 ///The MediaPicker widget that will select media files form storage
 class MediaPicker extends StatefulWidget {
@@ -15,6 +16,7 @@ class MediaPicker extends StatefulWidget {
     required this.mediaList,
     this.onCancel,
     this.mediaCount = MediaCount.multiple,
+    this.mediaCountMax = 6,
     this.mediaType = MediaType.all,
     this.decoration,
     this.scrollController,
@@ -33,6 +35,9 @@ class MediaPicker extends StatefulWidget {
 
   ///make picker to select multiple or single media file
   final MediaCount mediaCount;
+
+  ///make picker to select multiple or single media file
+  final int mediaCountMax;
 
   ///Make picker to select specific type of media, video or image
   final MediaType mediaType;
@@ -60,7 +65,9 @@ class _MediaPickerState extends State<MediaPicker> {
   final _headerController = GlobalKey<HeaderState>();
 
   AssetPathEntity? _selectedAlbum;
-  late List<MediaViewModel> _selectedMedias = [...MediaConversionService.toMediaViewList(widget.mediaList)];
+  late List<MediaViewModel> _selectedMedias = [
+    ...MediaConversionService.toMediaViewList(widget.mediaList)
+  ];
 
   Future<List<AssetPathEntity>> _fetchAlbums() async {
     var type = RequestType.common;
@@ -83,7 +90,8 @@ class _MediaPickerState extends State<MediaPicker> {
     }
   }
 
-  Future _onMediaTilePressed(MediaViewModel media, List<MediaViewModel> selectedMedias) async {
+  Future _onMediaTilePressed(
+      MediaViewModel media, List<MediaViewModel> selectedMedias) async {
     _headerController.currentState?.updateSelection(selectedMedias);
 
     setState(() {
@@ -170,7 +178,8 @@ class _MediaPickerState extends State<MediaPicker> {
                 ],
               ),
             ),
-            if (_decoration.actionBarPosition == ActionBarPosition.bottom) header,
+            if (_decoration.actionBarPosition == ActionBarPosition.bottom)
+              header,
           ],
         );
       }
